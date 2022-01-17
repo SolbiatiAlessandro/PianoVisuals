@@ -1,6 +1,7 @@
 from __future__ import annotations
 import cv2 as cv
 from constants import WIDTH, HEIGHT, HORIZON
+import utils
 
 class Point:
     def __init__(self, x, y):
@@ -67,4 +68,23 @@ class Line:
         x = (otherLine.q - self.q)/(self.m - otherLine.m)
         y = x * self.m + self.q
         return Point(x, y)
-      
+
+class RotatingLine():
+
+    def __init__(self, startRotation, startTime, center, maxRotation = WIDTH):
+        self.rotation = startRotation
+        self.startTime = startTime
+        self.center = center
+        self.color = utils.randomColor()
+        #self.thickness = utils.randomThickness()
+        self.thickness = 1
+
+    def __str__(self):
+        return "RotatingLine: startTime {}".format(self.startTime)
+
+    def draw(self, frameImage, ts):
+        if ts >= self.startTime and self.rotation < WIDTH:
+            self.rotation += 10
+            line = Line(Point(self.rotation, HEIGHT), self.center)
+            line.drawBelowHorizon(frameImage, color = self.color, thickness=self.thickness)
+

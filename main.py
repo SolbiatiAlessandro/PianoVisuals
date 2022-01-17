@@ -1,9 +1,13 @@
 import cv2 as cv
 import numpy as np
-from Line import Line, Point
+from Line import Line, Point, RotatingLine
+import constants
 from constants import WIDTH, HEIGHT, HORIZON
 import utils
+from random import random
 
+fourcc = cv.VideoWriter_fourcc(*'MP4V')
+video = cv.VideoWriter('./AlexMozartBackground.mp4', fourcc, float(constants.FPS), (constants.WIDTH, constants.HEIGHT))
 
 fixedImage = np.full((HEIGHT,WIDTH,3), (172,170,164), dtype='uint8')
 
@@ -33,14 +37,22 @@ pts =np.array([
     keyboardClose.endPoint.toList()])
 cv.fillPoly(fixedImage, pts=np.int32([pts]), color=(248,244,236))
 
-for i in [600, 700, 800, 900, 1000, WIDTH]:
-    k3 = Line(Point(i, HEIGHT), center)
-    k3.drawBelowHorizon(fixedImage, color = utils.randomColor(), thickness=1)
+movieLenghtSeconds = 30
+linesPerSec = 10
+rotatingLines = [RotatingLine(550, i / linesPerSec, center) 
+        for i in range(movieLenghtSeconds * linesPerSec) if random() > 0.5]
+for r in rotatingLines: print(r)
 
+for ts in range(constants.FPS * movieLenghtSeconds):
+    frameImage = np.copy(fixedImage)
+    for r in rotatingLines:
+        ts_seconds = ts / constants.FPS
+        r.draw(frameImage, ts_seconds)
+    video.write(frameImage)
 
+video.release()
 
-
-
-
+"""
 cv.imshow('image', fixedImage)
 cv.waitKey(0)
+"""
